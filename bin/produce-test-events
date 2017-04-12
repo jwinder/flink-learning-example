@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+
+require "socket"
+require "securerandom"
+
+# configuration
+PORT = "9000"
+NUMBER_OF_USERS = 5
+
+USERS = Array.new(NUMBER_OF_USERS) { |i| { :user_id => SecureRandom.uuid, :username => SecureRandom.uuid } }
+EVENT_TYPES = [ "pageview", "userlogin" ]
+
+def generate_next_event()
+  event_id = SecureRandom.uuid
+  user = USERS.sample
+  user_id = user[:user_id]
+  username = user[:username]
+  event_type = EVENT_TYPES.sample
+  event = "#{event_type}|#{event_id}|#{user_id}"
+  event += "|#{username}" if event_type == "userlogin"
+  event
+
+  puts "sending event: #{event}"
+  event
+end
+
+def send_event(client)
+  event = generate_next_event
+  client.puts(event)
+end
+
+def send_events(server)
+  loop do
+    Thread.start(server.accept) do |client|
+      puts "New client connecton: #{client}"
+      begin
+        while true
+          send_event(client)
+          sleep 1
+        end
+      rescue Exception => e
+        puts e
+        raise
+      ensure
+        puts "Client connection closed: #{client}"
+        client.close()
+      end
+    end
+  end
+end
+
+def main
+  server = TCPServer.new PORT
+  puts "Listening on port #{PORT}"
+  begin
+    send_events(server)
+    server.close()
+  rescue Interrupt
+    server.close()
+    puts "Shutting down server"
+    exit
+  end
+end
+
+main
