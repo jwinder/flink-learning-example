@@ -1,6 +1,6 @@
 package example
 
-import java.time.Instant
+import java.time.{Instant, OffsetDateTime}
 
 case class User(
   id: String
@@ -19,24 +19,24 @@ object Event {
 
   def parsePageview(s: String): Pageview = {
     val tokens = s.split('|')
-    Pageview(tokens(1), tokens(2))
+    Pageview(tokens(1), tokens(2), OffsetDateTime.parse(tokens(3)).toInstant)
   }
 
   def parseUserLogin(s: String): UserLogin = {
     val tokens = s.split('|')
-    UserLogin(tokens(1), tokens(2), tokens(3))
+    UserLogin(tokens(1), tokens(2), tokens(3), OffsetDateTime.parse(tokens(4)).toInstant)
   }
 }
 
 case class Pageview(
   id: String,
   userId: String,
-  eventTime: Instant = Instant.now()
+  eventTime: Instant
 ) extends Event
 
 case class UserLogin(
   id: String,
   userId: String,
   username: String,
-  eventTime: Instant = Instant.now()
+  eventTime: Instant
 ) extends Event

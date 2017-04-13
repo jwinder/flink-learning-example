@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'time'
 require "socket"
 require "securerandom"
 
@@ -12,20 +13,20 @@ EVENT_TYPES = [ "pageview", "userlogin" ]
 
 def generate_next_event()
   event_id = SecureRandom.uuid
+  event_time = Time.now.iso8601
   user = USERS.sample
   user_id = user[:user_id]
   username = user[:username]
   event_type = EVENT_TYPES.sample
   event = "#{event_type}|#{event_id}|#{user_id}"
   event += "|#{username}" if event_type == "userlogin"
-  event
-
-  puts "sending event: #{event}"
+  event += "|#{event_time}"
   event
 end
 
 def send_event(client)
   event = generate_next_event
+  puts "sending event: #{event}"
   client.puts(event)
 end
 

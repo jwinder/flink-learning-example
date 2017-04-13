@@ -31,9 +31,11 @@ object TestFlinkJob extends App {
     (pageviews, logins)
   }
 
+  val events: ConnectedStreams[Pageview, UserLogin]  = pageviews.connect(logins)
+  val aggregations: DataStream[Aggregation] = events.map(Aggregation(_), Aggregation(_))
+
   val userAggregationsEveryFiveSeconds = {
-    pageviews
-      .map(Aggregation(_))
+    aggregations
       .keyBy(_.userId)
       .timeWindow(Time.seconds(5))
       .reduce(_ ++ _)

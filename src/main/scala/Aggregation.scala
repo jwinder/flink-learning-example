@@ -10,7 +10,8 @@ case class Aggregation(
   earliestPageview: Option[Instant],
   mostRecentPageview: Option[Instant],
   earliestUserLogin: Option[Instant],
-  mostRecentUserLogin: Option[Instant]) {
+  mostRecentUserLogin: Option[Instant]
+) {
   def ++(other: Aggregation) = copy(pageviewCount = pageviewCount + other.pageviewCount,
                                     userLoginCount  = userLoginCount + other.userLoginCount,
                                     earliestPageview = (earliestPageview ++ other.earliestPageview).reduceOption(Ordering[Instant].min),
